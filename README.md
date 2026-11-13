@@ -2,7 +2,7 @@
 
 La charte graphique Iozy — **IozyCore** (le catalogue de collection) et **IozyTest** (le blindtest) — en un seul endroit : les couleurs des deux thèmes, les polices, les rayons, les règles d'interaction, les composants de base, la construction du logo, et le contrôle de contraste qui garantit que tout reste lisible.
 
-Ce dépôt est la **source de vérité**. Les apps n'y pointent pas à l'exécution : chacune l'installe comme **dépendance git épinglée sur un commit** (voir « Consommer »). Le dépôt est public, leurs déploiements (Vercel, Docker sur NAS) le téléchargent comme n'importe quel paquet.
+Ce dépôt est la **source de vérité**. Les apps n'y pointent pas à l'exécution : chacune l'installe comme **dépendance épinglée sur un tag**, par l'archive HTTPS du tag (voir « Consommer »). Le dépôt est public, leurs déploiements (Vercel, Docker sur NAS) le téléchargent comme n'importe quel paquet.
 
 ## Contenu
 
@@ -31,13 +31,15 @@ Toute modification de `tokens.json` passe par `npm test` avant le commit : une c
 
 ## Consommer
 
-Le kit vit dans le même dépôt que les deux apps (`iozykit/`, à côté de `iozycore/` et `iozytest/`). Chacune le déclare en dépendance locale :
+Chaque app (dépôts `iozycore` et `iozytest`) épingle un tag de ce dépôt par son archive HTTPS :
 
 ```json
-"iozykit": "file:../iozykit"
+"iozykit": "https://github.com/RomainCharpentier/IozyKit/archive/refs/tags/v0.1.0.tar.gz"
 ```
 
-`npm install` (et `npm ci` au déploiement) pose un lien `node_modules/iozykit` vers ce dossier : une modification de la charte est visible dans l'app aussitôt, en dev comme au build, sans numéro à avancer. Les images Docker des deux apps se construisent depuis la racine du dépôt pour voir ce dossier. Un changement de `tokens.json` passe par `npm test` ici avant le commit.
+Pas `github:RomainCharpentier/IozyKit#v0.1.0` : npm l'enregistre en `git+ssh`, et `npm ci` demanderait alors git et une clé SSH dans les images Alpine et en CI. L'archive s'installe en HTTPS, et `package-lock.json` en garde l'empreinte.
+
+Publier une charte : `npm test` ici, commit, nouveau tag `vX.Y.Z` (avancer aussi `version` dans `package.json`), push du tag ; puis, dans chaque app, la nouvelle adresse et `npm install`.
 
 ### Depuis IozyTest (React + Vite + SCSS modules)
 
